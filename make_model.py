@@ -1,6 +1,8 @@
 import tensorflow as tf
-import keras
+from tensorflow import keras
 import numpy as np
+import pandas as pd
+import time
 
 
 def create_model(pooling = False, act = "softmax"):
@@ -32,32 +34,60 @@ def model_stuff(train_ds, val_ds, config):
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"])
         print("modelAdam")
-        modelAdam.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
+        tmp = f"model_checkpoints/{config.epochs}Epochs__{config.optimizer}Optimizer-{config.augmentation}Augmentation_lrate{config.learningrate}_mom{config.momentum}_"
+        callbacks = [
+            keras.callbacks.ModelCheckpoint(tmp + "save_at_{epoch}.h5", period = 50),
+        ]
+        begintime = time.time()
+        hist = modelAdam.fit(train_ds, epochs= ep, callbacks=callbacks, validation_data=val_ds)
 
-    if opt=="SGD":
+    elif opt=="SGD":
         modelSGD = tf.keras.models.clone_model(model)
         modelSGD.compile(
             optimizer=tf.keras.optimizers.SGD(learning_rate=lr,momentum=mo), #idea:learning rate schedule (tf.keras.optimizers.schedules.LearningRateSchedule) so it starts with 0.01 and gets smaller over time
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"])
         print("modelSGD")
-        modelSGD.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
+        tmp = f"model_checkpoints/{config.epochs}Epochs__{config.optimizer}Optimizer-{config.augmentation}Augmentation_lrate{config.learningrate}_mom{config.momentum}_"
+        callbacks = [
+            keras.callbacks.ModelCheckpoint(tmp + "save_at_{epoch}.h5", period = 50),
+        ]
+        begintime = time.time()
+        hist = modelSGD.fit(train_ds, epochs= ep, callbacks=callbacks, validation_data=val_ds)
 
-    if opt=="RMS":
+    elif opt=="RMS":
         modelRMSprop = tf.keras.models.clone_model(model)
         modelRMSprop.compile(
             tf.keras.optimizers.RMSprop(learning_rate=lr,momentum=mo), # momentum could be played with \o/
             loss="sparse_categorial_crossentropy",
             metrics=["accuracy"])
         print("modelRMSprop")
-        modelRMSprop.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
+        tmp = f"model_checkpoints/{config.epochs}Epochs__{config.optimizer}Optimizer-{config.augmentation}Augmentation_lrate{config.learningrate}_mom{config.momentum}_"
+        callbacks = [
+            keras.callbacks.ModelCheckpoint(tmp + "save_at_{epoch}.h5", period = 50),
+        ]
+        begintime = time.time()
+        hist = modelRMSprop.fit(train_ds, epochs= ep, callbacks=callbacks, validation_data=val_ds)
+    else:
+        print("error: choose optimizer")
 
-    # # fit the different models :D
-    # print("modelAdam")
-    # modelAdam.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
-    # print("modelSGD")
-    # modelSGD.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
-    # print("modelRMSprop")
-    # modelRMSprop.fit(train_ds, epochs= ep, callbacks=None, validation_data=val_ds)
+    # recording
+    # begintime = time.time()
+    # hist = model.fit(
+    #     train_ds, epochs=config.epochs, callbacks=callbacks, validation_data=val_ds,
+    # )
+    endtime = time.time()
+    lapsedtimemillis = round((endtime - begintime) * 1000)
+    print(f"Training completed in {lapsedtimemillis} milliseconds")
+
+    print("Saving history of accuracy...")                                       
+    hist_df = pd.DataFrame.from_dict(hist.history) 
+    filepath = f"./model_training_history/{config.epochs}Epochs_-{config.optimizer}Optimizer-{config.augmentation}Augmentation_lrate{config.learningrate}_mom{config.momentum}"
+    hist_df.to_csv(filepath + "-history.csv")
+
+    # write lapsed time in millis to file:
+    f = open(filepath + "-lapsedtimemillis.txt", "a")
+    f.write(f"Training took: \n{lapsedtimemillis}\nmilliseconds")
+    f.close()
 
     return model #could return the trained models -> returning unchanged one now!

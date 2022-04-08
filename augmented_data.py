@@ -3,7 +3,7 @@ import tensorflow as tf
 import pandas as pd
 
 
-def load_data():
+def load_aug_data():
     aug = ImageDataGenerator(
         width_shift_range=0.1,
         height_shift_range=0.1,
