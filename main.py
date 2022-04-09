@@ -15,9 +15,11 @@ def main():
     # log.info(config)
 
     #Create the dataset:
-    if config.augmentation:
+    if config.augmentation == True:
+        print("## Augmented ##")
         train_ds, val_ds = load_aug_data()
     else:
+        print("## NOT Augmented ##")
         train_ds, val_ds = create_data()
 
     # make, train, and test model

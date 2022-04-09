@@ -59,7 +59,7 @@ def model_stuff(train_ds, val_ds, config):
         modelRMSprop = tf.keras.models.clone_model(model)
         modelRMSprop.compile(
             tf.keras.optimizers.RMSprop(learning_rate=lr,momentum=mo), # momentum could be played with \o/
-            loss="sparse_categorial_crossentropy",
+            loss="sparse_categorical_crossentropy",
             metrics=["accuracy"])
         print("modelRMSprop")
         tmp = f"model_checkpoints/{config.epochs}Epochs__{config.optimizer}Optimizer-{config.augmentation}Augmentation_lrate{config.learningrate}_mom{config.momentum}_"

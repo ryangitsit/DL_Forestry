@@ -1,0 +1,5 @@
+Training took: 
+974038
+millisecondsTraining took: 
+903443
+milliseconds
