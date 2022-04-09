@@ -30,7 +30,7 @@ def model_stuff(train_ds, val_ds, config):
         # compile models TODO: play with loss function, find out why sparse is the only one withour an error
         modelAdam = tf.keras.models.clone_model(model)
         modelAdam.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=lr,momentum=mo),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=lr),
             loss="sparse_categorical_crossentropy",
             metrics=["accuracy"])
         print("modelAdam")
